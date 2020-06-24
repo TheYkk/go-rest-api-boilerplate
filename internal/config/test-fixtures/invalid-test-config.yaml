@@ -1,0 +1,3 @@
+mongoSettings:
+  databaseName: "Db"
+  uri:"mongodb://guest:guest@127.0.0.1:27017/admin?readPreference=primary"

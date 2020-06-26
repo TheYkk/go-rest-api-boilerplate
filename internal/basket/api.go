@@ -28,15 +28,16 @@ func RegisterHandlers(instance *echo.Echo, repo Repository) {
 type resource struct {
 	service Service
 }
+
 func (r *resource) getBasket(ctx echo.Context) error {
 
 	id := ctx.Param("id")
 	result, err := r.service.Get(ctx.Request().Context(), id)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError,err.Error())
+		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
-	if result ==nil{
-		return ctx.JSON(http.StatusNotFound,err.Error())
+	if result == nil {
+		return ctx.JSON(http.StatusNotFound, err.Error())
 	}
 	return ctx.JSON(http.StatusOK, result)
 
@@ -50,4 +51,3 @@ func (r *resource) deleteBasket(ctx echo.Context) error {
 func (r *resource) deleteItem(ctx echo.Context) error {
 	return nil
 }
-

@@ -36,7 +36,3 @@ func (nopLogger) Fatalf(format string, args ...interface{}) {}
 func (nopLogger) Panic(i ...interface{})                    {}
 func (nopLogger) Panicj(j log.JSON)                         {}
 func (nopLogger) Panicf(format string, args ...interface{}) {}
-
-func (l nopLogger) WithField(string, interface{}) Logger { return l }
-func (l nopLogger) WithFields(Fields) Logger             { return l }
-func (l nopLogger) WithError(error) Logger               { return l }

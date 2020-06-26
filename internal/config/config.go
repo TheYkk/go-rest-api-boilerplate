@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/labstack/gommon/log"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
@@ -16,6 +17,7 @@ type (
 	MongoSettings struct {
 		DatabaseName string
 		Uri          string
+		Timeout      int
 	}
 
 	configReader struct {
@@ -29,13 +31,13 @@ func GetAllValues(configPath, configFile string) (configuration *Configuration, 
 	newConfigReader(configPath, configFile)
 	if err = cfgReader.v.ReadInConfig(); err != nil {
 		log.Error(err)
-		return nil, err
+		return nil, errors.Wrap(err, "Config: Failed to read config file.")
 	}
 
 	err = cfgReader.v.Unmarshal(&configuration)
 	if err != nil {
 		log.Error(err)
-		return nil, err
+		return nil, errors.Wrap(err, "Config: Failed to unmarshal yaml file to configuration object.")
 	}
 	return
 }
@@ -46,7 +48,6 @@ func newConfigReader(configPath, configFile string) {
 	vip.SetConfigType("yaml")
 	vip.SetConfigName(configFile)
 	vip.AddConfigPath(configPath)
-
 	cfgReader = &configReader{
 		configFile: configFile,
 		v:          vip,

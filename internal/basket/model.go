@@ -9,6 +9,9 @@ import (
 var (
 	maxQuantityPerProduct          = 10
 	minCartAmountForCheckout int64 = 50
+
+	ErrNoBuyer  = errors.New("Buyer field can not null or empty")
+	ErrNotFound = errors.New("Item not found")
 )
 
 type (
@@ -31,7 +34,7 @@ type (
 func Create(buyer string) (*Basket, error) {
 
 	if len(buyer) == 0 {
-		return nil, errors.New("Buyer field can not null or empty")
+		return nil, ErrNoBuyer
 	}
 
 	return &Basket{
@@ -47,15 +50,20 @@ func (b *Basket) AddItem(quantity int, price int64, sku string) (*Item, error) {
 	if quantity >= maxQuantityPerProduct {
 		return nil, errors.Errorf("You can't add more item. Item count can be less then %d", maxQuantityPerProduct)
 	}
+	_, item := b.SearchItemBySku(sku)
+	if item != nil {
+		return item, errors.New("Service: Item already added")
+	}
 
-	item := Item{
+	item = &Item{
 		Id:        GenerateId(),
 		Sku:       sku,
 		UnitPrice: price,
 		Quantity:  quantity,
 	}
-	b.Items = append(b.Items, item)
-	return &item, nil
+	b.Items = append(b.Items, *item)
+	b.UpdatedAt = time.Now()
+	return item, nil
 }
 func (b *Basket) UpdateItem(itemId string, quantity int) (err error) {
 
@@ -69,6 +77,7 @@ func (b *Basket) UpdateItem(itemId string, quantity int) (err error) {
 	} else {
 		return errors.Errorf("Item can not found. ItemId : %s", itemId)
 	}
+	b.UpdatedAt = time.Now()
 	return
 }
 
@@ -77,8 +86,9 @@ func (b *Basket) RemoveItem(itemId string) (err error) {
 	if index, _ := b.SearchItem(itemId); index != -1 {
 		b.Items = append(b.Items[:index], b.Items[index+1:]...)
 	} else {
-		err = errors.New("Item not found")
+		return ErrNotFound
 	}
+	b.UpdatedAt = time.Now()
 	return
 }
 
@@ -86,6 +96,15 @@ func (b *Basket) SearchItem(itemId string) (int, *Item) {
 
 	for i, n := range b.Items {
 		if n.Id == itemId {
+			return i, &n
+		}
+	}
+	return -1, nil
+}
+func (b *Basket) SearchItemBySku(sku string) (int, *Item) {
+
+	for i, n := range b.Items {
+		if n.Sku == sku {
 			return i, &n
 		}
 	}

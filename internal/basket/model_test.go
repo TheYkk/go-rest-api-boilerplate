@@ -19,10 +19,13 @@ func TestBasketModel(usecase *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.testName, func(t *testing.T) {
 				_, err := Create(tt.buyer)
-				assert.Equal(t, tt.wantError, err != nil)
+				if (err != nil) != tt.wantError {
+					t.Errorf("Create() error = %v, wantErr %v", err, tt.wantError)
+				}
 			})
 		}
 	})
+
 	usecase.Run("AddItem", func(t *testing.T) {
 
 		basket, _ := Create("Buyer")
@@ -37,12 +40,16 @@ func TestBasketModel(usecase *testing.T) {
 			wantError bool
 		}{
 			{"WithValidItem_ShouldSuccess", given{quantity: 3, price: 5, sku: "SKU1"}, false},
-			{"WithValidPriceandQuantity_ShouldSuccess", given{quantity: 9, price: 2, sku: "SKU1"}, false},
+			{"WithAlreadyExistItem_ShouldBeFailed", given{quantity: 9, price: 2, sku: "SKU1"}, true},
+			{"WithValidPriceandQuantity_ShouldSuccess", given{quantity: 9, price: 2, sku: "SKU3"}, false},
 			{"WithInvalidQuantity_ShouldFailed", given{quantity: 11, price: 5, sku: "SKU2"}, true},
 		}
 		for _, tt := range tests {
 			t.Run(tt.testName, func(t *testing.T) {
 				_, err := basket.AddItem(tt.given.quantity, tt.given.price, tt.given.sku)
+				if err != nil {
+					t.Log(err.Error())
+				}
 				assert.Equal(t, tt.wantError, err != nil)
 			})
 		}

@@ -1,4 +1,5 @@
 # Go RESTful API Starter Kit (Boilerplate)
+(rest api vs microservice starter kit ?)
 
 TODO List:
 
@@ -16,3 +17,6 @@ PKG :
 - healthcheck
 - pagination
 - graceful
+
+test:
+- use "go get github.com/google/go-cmp/cmp" 

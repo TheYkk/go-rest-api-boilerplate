@@ -30,7 +30,7 @@ func TestService(usecase *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 
-				if got := NewService(tt.args.repo); !reflect.DeepEqual(got, tt.want) {
+				if got := newService(tt.args.repo); !reflect.DeepEqual(got, tt.want) {
 					t.Errorf("NewService() = %v, want %v", got, tt.want)
 				}
 			})
@@ -47,7 +47,7 @@ func TestService(usecase *testing.T) {
 
 		mockRepo := &mockRepository{items: []Basket{givenBasket}}
 		loadData(mockRepo)
-		s := NewService(mockRepo)
+		s := newService(mockRepo)
 
 		t.Run("Get Method Tests", func(t *testing.T) {
 			type args struct {
@@ -145,7 +145,7 @@ func TestService(usecase *testing.T) {
 		}
 		mockRepo := &mockRepository{items: []Basket{givenBasket}}
 		loadData(mockRepo)
-		s := NewService(mockRepo)
+		s := newService(mockRepo)
 		ctx := context.Background()
 
 		t.Run("CreateBasket", func(t *testing.T) {

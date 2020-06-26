@@ -122,7 +122,7 @@ func (s *service) Delete(ctx context.Context, id string) (*Basket, error) {
 }
 
 // NewService creates a new basket service.
-func NewService(repo Repository) Service {
+func newService(repo Repository) Service {
 
 	if repo == nil {
 		return nil

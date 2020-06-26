@@ -172,6 +172,13 @@ func TestService(usecase *testing.T) {
 				assert.Equal(t, err.Error(),"Service: Basket not found")
 
 			})
+			t.Run("WithemptyBasketId_ShouldBeFailed", func(t *testing.T) {
+				_, err := s.Delete(ctx, "")
+				t.Log(err)
+				assert.Equal(t, "sql: no rows in result set",errors.Cause(err).Error())
+
+			})
+
 			t.Run("WithExistBasketIdButCantDelete_ShouldBeFailed", func(t *testing.T) {
 				_, err := s.Delete(ctx, "CantDelete")
 				t.Log(err)
@@ -191,6 +198,8 @@ func TestService(usecase *testing.T) {
 				{name: "WithValidItem_ShouldBeAdded", args: []string{"ID_5", "SKU_2", "5", "10"}, want: "", wantErr: false, wantStr: ""},
 				{name: "WithExistItem_ShouldBeFailed", args: []string{"ID_5", "SKU_5", "5", "10"}, want: "", wantErr: true, wantStr: "Service: Item already added"},
 				{name: "WithNonExistBasket_ShouldBeFailed", args: []string{"INVALID_BASKET_ID", "SKU_1", "5", "10"}, want: "", wantErr: true, wantStr: "Service: Basket not found"},
+				{name: "WithNonExistBasket_ShouldBeFailed", args: []string{"", "SKU_1", "5", "10"}, want: "", wantErr: true, wantStr: "sql: no rows in result set"},
+
 			}
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {
@@ -216,6 +225,8 @@ func TestService(usecase *testing.T) {
 				{name: "WithValidItemParameters_ShouldBeSuccess", args: []string{"ID_UPDATE", "ITEM_UPDATE", "9"}, wantErr: false, wantStr: ""},
 				{name: "WithInvalidItemIdParameters_ShouldBeSuccess", args: []string{"ID_UPDATE", "INVALID_ITEM_ID", "9"}, wantErr: true, wantStr: "Item can not found. ItemId : INVALID_ITEM_ID"},
 				{name: "WithInvalidBasketIdParameters_ShouldBeSuccess", args: []string{"ID_INVALID_ID", "ITEM_UPDATE", "9"}, wantErr: true, wantStr: "Service: Basket not found"},
+				{name: "WithInvalidBasketIdParameters_ShouldBeSuccess", args: []string{"", "ITEM_UPDATE", "9"}, wantErr: true, wantStr: "sql: no rows in result set"},
+
 			}
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {
@@ -239,6 +250,7 @@ func TestService(usecase *testing.T) {
 				{name: "WithValidItem_ShouldBeSuccess", args: []string{"ID_DELETE", "ITEM_DELETE"}, wantErr: false},
 				{name: "WithValidItem_ShouldBeSuccess", args: []string{"ID_DELETE", "INVALID_ITEM_DELETE"}, wantErr: true},
 				{name: "WithValidItem_ShouldBeSuccess", args: []string{"INVALID_ID_DELETE", "ITEM_DELETE"}, wantErr: true},
+				{name: "WithValidItem_ShouldBeSuccess", args: []string{"", "ITEM_DELETE"}, wantErr: true},
 			}
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {

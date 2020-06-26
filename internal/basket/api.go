@@ -37,7 +37,7 @@ func (r *resource) getBasket(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
 	if result == nil {
-		return ctx.JSON(http.StatusNotFound, err.Error())
+		return ctx.JSON(http.StatusNotFound, "")
 	}
 	return ctx.JSON(http.StatusOK, result)
 

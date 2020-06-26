@@ -50,30 +50,21 @@ func TestService(usecase *testing.T) {
 		s := newService(mockRepo)
 
 		t.Run("Get Method Tests", func(t *testing.T) {
-			type args struct {
-				ctx context.Context
-				id  string
-			}
+
 			tests := []struct {
 				name       string
-				args       args
+				args       string
 				wantBasket *Basket
 				wantErr    bool
 			}{
-				{name: "WithEmptyBasket_ShouldNotFoundError", args: struct {
-					ctx context.Context
-					id  string
-				}{ctx: context.TODO(), id: "INVALID_ID"}, wantBasket: nil, wantErr: true},
-				{name: "WithEmptyBasket", args: struct {
-					ctx context.Context
-					id  string
-				}{ctx: context.TODO(), id: "ID_1"}, wantBasket: &givenBasket, wantErr: false},
+				{name: "WithEmptyBasket_ShouldNotFoundError", args:  "INVALID_ID", wantBasket: nil, wantErr: false},
+				{name: "WithEmptyBasket",args:  "ID_1", wantBasket: &givenBasket, wantErr: false},
 			}
-
+			ctx := context.Background()
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {
 
-					gotBasket, err := s.Get(tt.args.ctx, tt.args.id)
+					gotBasket, err := s.Get(ctx, tt.args)
 					if (err != nil) != tt.wantErr {
 						t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
 						return
@@ -178,7 +169,7 @@ func TestService(usecase *testing.T) {
 			t.Run("WithNotFoundBasketId_ShouldBeFailed", func(t *testing.T) {
 				_, err := s.Delete(ctx, "NotFound")
 				t.Log(err)
-				assert.Equal(t, sql.ErrNoRows, errors.Cause(err))
+				assert.Equal(t, err.Error(),"Service: Basket not found")
 
 			})
 			t.Run("WithExistBasketIdButCantDelete_ShouldBeFailed", func(t *testing.T) {
@@ -199,7 +190,7 @@ func TestService(usecase *testing.T) {
 			}{
 				{name: "WithValidItem_ShouldBeAdded", args: []string{"ID_5", "SKU_2", "5", "10"}, want: "", wantErr: false, wantStr: ""},
 				{name: "WithExistItem_ShouldBeFailed", args: []string{"ID_5", "SKU_5", "5", "10"}, want: "", wantErr: true, wantStr: "Service: Item already added"},
-				{name: "WithNonExistBasket_ShouldBeFailed", args: []string{"INVALID_BASKET_ID", "SKU_1", "5", "10"}, want: "", wantErr: true, wantStr: "sql: no rows in result set"},
+				{name: "WithNonExistBasket_ShouldBeFailed", args: []string{"INVALID_BASKET_ID", "SKU_1", "5", "10"}, want: "", wantErr: true, wantStr: "Service: Basket not found"},
 			}
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {
@@ -224,7 +215,7 @@ func TestService(usecase *testing.T) {
 			}{
 				{name: "WithValidItemParameters_ShouldBeSuccess", args: []string{"ID_UPDATE", "ITEM_UPDATE", "9"}, wantErr: false, wantStr: ""},
 				{name: "WithInvalidItemIdParameters_ShouldBeSuccess", args: []string{"ID_UPDATE", "INVALID_ITEM_ID", "9"}, wantErr: true, wantStr: "Item can not found. ItemId : INVALID_ITEM_ID"},
-				{name: "WithInvalidBasketIdParameters_ShouldBeSuccess", args: []string{"ID_INVALID_ID", "ITEM_UPDATE", "9"}, wantErr: true, wantStr: "sql: no rows in result set"},
+				{name: "WithInvalidBasketIdParameters_ShouldBeSuccess", args: []string{"ID_INVALID_ID", "ITEM_UPDATE", "9"}, wantErr: true, wantStr: "Service: Basket not found"},
 			}
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {
@@ -279,12 +270,17 @@ type mockRepository struct {
 }
 
 func (m mockRepository) Get(ctx context.Context, id string) (*Basket, error) {
+
+	if len(id) == 0{
+		return nil,sql.ErrNoRows
+	}
+
 	for _, item := range m.items {
 		if item.Id == id {
 			return &item, nil
 		}
 	}
-	return nil, sql.ErrNoRows
+	return nil, nil
 }
 
 func (m mockRepository) Count(ctx context.Context) (int, error) {

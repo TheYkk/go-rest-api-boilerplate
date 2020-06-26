@@ -74,7 +74,9 @@ func (s *service) AddItem(ctx context.Context, basketId, sku string, quantity in
 	if err != nil {
 		return "", errors.Wrap(err, "Service: Get basket error. Basket Id.")
 	}
-
+	if basket ==nil{
+		return "",errors.New("Service: Basket not found")
+	}
 	item, err := basket.AddItem(quantity, price, sku)
 
 	if err != nil {
@@ -87,6 +89,9 @@ func (s *service) UpdateItem(ctx context.Context, basketId, itemId string, quant
 	basket, err := s.repo.Get(ctx, basketId)
 	if err != nil {
 		return errors.Wrapf(err, "Service: Get basket error. Basket Id:%s", basketId)
+	}
+	if basket ==nil{
+		return errors.New("Service: Basket not found")
 	}
 	err = basket.UpdateItem(itemId, quantity)
 
@@ -102,6 +107,9 @@ func (s *service) DeleteItem(ctx context.Context, basketId, itemId string) error
 	if err != nil {
 		return errors.Wrapf(err, "Service: Get basket error. Basket Id:%s", basketId)
 	}
+	if basket ==nil{
+		return errors.New("Service: Basket not found")
+	}
 	err = basket.RemoveItem(itemId)
 	if err != nil {
 		return errors.Wrap(err, "Service: Basket Item not found.")
@@ -113,7 +121,10 @@ func (s *service) DeleteItem(ctx context.Context, basketId, itemId string) error
 func (s *service) Delete(ctx context.Context, id string) (*Basket, error) {
 	basket, err := s.Get(ctx, id)
 	if err != nil {
-		return basket, err
+		return nil, err
+	}
+	if basket ==nil{
+		return nil,errors.New("Service: Basket not found")
 	}
 	if err = s.repo.Delete(ctx, id); err != nil {
 		return nil, errors.Wrap(err, "Service:Failed to delete basket")

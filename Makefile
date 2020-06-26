@@ -25,3 +25,7 @@ test-cover: test ## run unit tests and show test coverage information
 .PHONY: lint
 lint: ## run golint on all Go package
 	@golint $(PACKAGES)
+
+.PHONY: build
+build:  ## build the API server binary
+	CGO_ENABLED=0 go build ${LDFLAGS} -a -o server $(MODULE)/cmd/server

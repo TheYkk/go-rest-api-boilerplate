@@ -24,7 +24,7 @@ func TestService(usecase *testing.T) {
 			args args
 			want Service
 		}{
-			{name: "WithValidArgs_ShouldSuccess", args: args{repo: NewRepository()}, want: &service{repo: NewRepository()}},
+			{name: "WithValidArgs_ShouldSuccess", args: args{repo: &mockRepository{}}, want: &service{repo: &mockRepository{} }},
 			{name: "WithNullRepo_ShouldReturnNil", args: args{nil}, want: nil},
 		}
 		for _, tt := range tests {
@@ -113,7 +113,7 @@ func TestService(usecase *testing.T) {
 		})
 		t.Run("Count Tests", func(t *testing.T) {
 
-			want := 102
+			 var want int64= 102
 			ctx := context.Background()
 			got, err := s.Count(ctx)
 			if err != nil {
@@ -255,6 +255,8 @@ func TestService(usecase *testing.T) {
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {
 
+
+
 					if err := s.DeleteItem(ctx, tt.args[0], tt.args[1]); (err != nil) != tt.wantErr {
 						t.Errorf("DeleteItem() error = %v, wantErr %v", err, tt.wantErr)
 					}
@@ -295,8 +297,8 @@ func (m mockRepository) Get(ctx context.Context, id string) (*Basket, error) {
 	return nil, nil
 }
 
-func (m mockRepository) Count(ctx context.Context) (int, error) {
-	return len(m.items), nil
+func (m mockRepository) Count(ctx context.Context) (int64, error) {
+	return int64(len(m.items)), nil
 }
 
 func (m mockRepository) Query(ctx context.Context, offset, limit int) ([]Basket, error) {

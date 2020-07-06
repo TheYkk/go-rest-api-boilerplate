@@ -10,7 +10,7 @@ import (
 type Service interface {
 	Get(ctx context.Context, id string) (*Basket, error)
 	Query(ctx context.Context, offset, limit int) ([]Basket, error)
-	Count(ctx context.Context) (int, error)
+	Count(ctx context.Context) (int64, error)
 
 	Create(ctx context.Context, buyer string) (*Basket, error)
 	Delete(ctx context.Context, id string) (*Basket, error)
@@ -44,7 +44,7 @@ func (s *service) Query(ctx context.Context, offset, limit int) ([]Basket, error
 	return items, nil
 }
 
-func (s *service) Count(ctx context.Context) (int, error) {
+func (s *service) Count(ctx context.Context) (int64, error) {
 
 	return s.repo.Count(ctx)
 }
@@ -82,6 +82,10 @@ func (s *service) AddItem(ctx context.Context, basketId, sku string, quantity in
 	if err != nil {
 		return "", errors.Wrap(err, "Service: Failed to item added to basket.")
 	}
+	if err:=s.repo.Update(ctx,basket);err!=nil{
+		return "",errors.Wrap(err,"Service: Failed to update basket in data storage.")
+	}
+
 	return item.Id, nil
 }
 func (s *service) UpdateItem(ctx context.Context, basketId, itemId string, quantity int) error {
@@ -98,6 +102,9 @@ func (s *service) UpdateItem(ctx context.Context, basketId, itemId string, quant
 	if err != nil {
 		return errors.Wrapf(err, "Service: Failed to update item")
 	}
+	if err:=s.repo.Update(ctx,basket);err!=nil{
+		return errors.Wrap(err,"Service: Failed to update basket in data storage.")
+	}
 	return nil
 }
 
@@ -113,6 +120,9 @@ func (s *service) DeleteItem(ctx context.Context, basketId, itemId string) error
 	err = basket.RemoveItem(itemId)
 	if err != nil {
 		return errors.Wrap(err, "Service: Basket Item not found.")
+	}
+	if err:=s.repo.Update(ctx,basket);err!=nil{
+		return errors.Wrap(err,"Service: Failed to update basket in data storage.")
 	}
 	return nil
 }
